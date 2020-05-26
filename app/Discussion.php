@@ -1,0 +1,33 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Discussion extends Model
+{
+    protected $fillable = [
+        'label', 'flat_id', 'locked_at'
+    ];
+
+    protected $casts = [
+        'id' => 'integer',
+        'flat_id' => 'integer',
+        'locked_at' => 'datetime',
+    ];
+
+    public function flat()
+    {
+        return $this->belongsTo('App\Flat');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany('App\Message');
+    }
+
+    public function participants()
+    {
+        return $this->morphToMany('App\User', 'participation', 'participants');
+    }
+}

@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'avatar', 'api_token'
     ];
 
     /**
@@ -25,7 +25,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'api_token'
     ];
 
     /**
@@ -34,6 +34,57 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
+        'id' => 'integer',
         'email_verified_at' => 'datetime',
     ];
+
+    public function categories()
+    {
+        return $this->hasMany('App\Category');
+    }
+
+    public function flatsOwned()
+    {
+        return $this->hasMany('App\Flat', 'creator_id');
+    }
+
+    public function notesOwned()
+    {
+        return $this->hasMany('App\Note', 'author_id');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany('App\Message', 'from_id');
+    }
+
+    public function transactionsOut()
+    {
+        return $this->hasMany('App\Transaction', 'from_id');
+    }
+
+    public function transactionsIn()
+    {
+        return $this->hasMany('App\Transaction', 'to_id');
+    }
+
+    public function discussions()
+    {
+        return $this->morphedByMany('App\Discussion', 'participation', 'participants');
+    }
+
+    public function events()
+    {
+        return $this->morphedByMany('App\Event', 'participation', 'participants');
+    }
+
+    public function flats()
+    {
+        return $this->morphedByMany('App\Flat', 'participation', 'participants');
+    }
+
+    public function notes()
+    {
+        return $this->morphedByMany('App\Discussion', 'participation', 'participants');
+    }
 }
