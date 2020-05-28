@@ -45,21 +45,69 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::get('/discussions', function (Request $request) {
-        if (!$request->query('with')) {
-            return $request->user()->discussions;
+        $discussions = $request->user()->discussions;
+        foreach ($discussions as $discussion) {
+            $discussion['latestMessage'] = \App\Message::where('discussion_id', $discussion['id'])
+                ->latest()->orderBy('id', 'desc')->first();
         }
-        return $request->user()->discussions->load(explode(',', $request->query('with')));
+        if ($request->query('with')) {
+            $discussions->load(explode(',', $request->query('with')));
+        }
+
+        return $discussions->sortByDesc(function ($item) {
+            return $item->latestMessage->created_at;
+        })->values()->all();
+    });
+
+    Route::post('/discussions', function (Request $request) {
+        $discussion = new \App\Discussion;
+        if ($request->label) {
+            $discussion->label = $request->label;
+        }
+        $discussion->flat_id = $request->flat_id;
+        $discussion->save();
+        $discussion->participants()->attach($request->participants);
+        $discussion->messages()->create([
+            'type' => 'discussion',
+            'content' => $request->startMessage,
+        ]);
+        $discussion['latestMessage'] = \App\Message::where('discussion_id', $discussion['id'])
+            ->latest()->orderBy('id', 'desc')->first();
+
+        return $discussion;
     });
 
     Route::get('/discussions/{discussion}', function (Request $request, \App\Discussion $discussion) {
         if (!$discussion->participants->contains($request->user()->id)) {
             return collect();
         }
+        $offset = $request->query('offset') ? intval($request->query('offset'), 10) : 0;
+        $limit = $request->query('limit') ? intval($request->query('limit'), 10) : 10;
+
+        $messages = \App\Message::where('discussion_id', $discussion['id'])
+            ->latest()->orderBy('id', 'desc')
+            ->offset($offset)->limit($limit)->get();
+
         foreach (explode(',', $request->query('with')) as $loadingProperty) {
             if (!$loadingProperty) continue;
             $discussion->load($loadingProperty);
         }
+        $discussion['messages'] = $messages;
         return $discussion;
+    });
+
+    Route::post('/discussions/{discussion}', function (Request $request, \App\Discussion $discussion) {
+        if (!$discussion->participants->contains($request->user()->id)) {
+            return collect();
+        }
+
+        $newMsg = $discussion->messages()->create([
+            'from_id' => !$request->type || ($request->type && $request->type === 'message') ? $request->user()->id : null,
+            'type' => $request->type ? $request->type : 'message',
+            'content' => $request->message,
+        ]);
+
+        return \App\Message::findOrFail($newMsg->id);
     });
 
     Route::get('/events', function (Request $request) {

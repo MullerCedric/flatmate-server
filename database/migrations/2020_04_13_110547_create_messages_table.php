@@ -18,7 +18,7 @@ class CreateMessagesTable extends Migration
             $table->foreignId('from_id')->nullable();
             $table->foreignId('discussion_id');
             $table->text('content');
-            $table->enum('type', ['message', 'log'])->default('message');
+            $table->enum('type', ['message', 'discussion', 'event', 'flat', 'note'])->default('message');
             $table->timestamps();
 
             $table->foreign('from_id')->references('id')->on('users')->onDelete('cascade');

@@ -7,6 +7,6 @@ use Faker\Generator as Faker;
 
 $factory->define(Message::class, function (Faker $faker) {
     return [
-        'content' => $faker->realText(200),
+        'content' => $faker->realText(rand(10, 100)),
     ];
 });

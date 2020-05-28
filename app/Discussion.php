@@ -23,7 +23,7 @@ class Discussion extends Model
 
     public function messages()
     {
-        return $this->hasMany('App\Message');
+        return $this->hasMany('App\Message')->latest()->orderBy('id', 'desc');
     }
 
     public function participants()

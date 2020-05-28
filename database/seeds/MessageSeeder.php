@@ -13,7 +13,13 @@ class MessageSeeder extends Seeder
     public function run()
     {
         Discussion::all()->each(function ($discussion) {
-            for ($i = 1; $i <= rand(0, 20); $i++) {
+            $from = $discussion->participants->random(1)->first();
+            $discussion->messages()->create([
+                'type' => 'discussion',
+                'content' => $from->name . ' a créé la discussion',
+            ]);
+
+            for ($i = 1; $i <= rand(5, 250); $i++) {
                 $fromId = $discussion->participants->random(1)->first()->id;
                 $discussion->messages()->save(factory(App\Message::class)->make([
                     'from_id' => $fromId,
