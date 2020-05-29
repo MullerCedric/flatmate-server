@@ -53,9 +53,19 @@ class User extends Authenticatable
         return $this->hasMany('App\Note', 'author_id');
     }
 
+    public function discussions()
+    {
+        return $this->morphedByMany('App\Discussion', 'participation', 'participants');
+    }
+
     public function messages()
     {
         return $this->hasMany('App\Message', 'from_id');
+    }
+
+    public function messagesRead()
+    {
+        return $this->belongsToMany('App\Message')->withTimestamps();
     }
 
     public function transactionsOut()
@@ -66,11 +76,6 @@ class User extends Authenticatable
     public function transactionsIn()
     {
         return $this->hasMany('App\Transaction', 'to_id');
-    }
-
-    public function discussions()
-    {
-        return $this->morphedByMany('App\Discussion', 'participation', 'participants');
     }
 
     public function events()

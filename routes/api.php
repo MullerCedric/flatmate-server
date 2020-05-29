@@ -88,6 +88,10 @@ Route::middleware('auth:api')->group(function () {
             ->latest()->orderBy('id', 'desc')
             ->offset($offset)->limit($limit)->get();
 
+        $messages->each(function ($message) use ($request) {
+            $message->readBy()->syncWithoutDetaching($request->user()->id);
+        });
+
         foreach (explode(',', $request->query('with')) as $loadingProperty) {
             if (!$loadingProperty) continue;
             $discussion->load($loadingProperty);
@@ -106,6 +110,7 @@ Route::middleware('auth:api')->group(function () {
             'type' => $request->type ? $request->type : 'message',
             'content' => $request->message,
         ]);
+        $newMsg->readBy()->syncWithoutDetaching($request->user()->id);
 
         return \App\Message::findOrFail($newMsg->id);
     });

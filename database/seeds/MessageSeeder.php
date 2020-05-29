@@ -13,17 +13,22 @@ class MessageSeeder extends Seeder
     public function run()
     {
         Discussion::all()->each(function ($discussion) {
-            $from = $discussion->participants->random(1)->first();
-            $discussion->messages()->create([
+            $participants = $discussion->participants;
+            $from = $participants->random(1)->first();
+            $participantsId = $participants->pluck('id')->all();
+            $message = $discussion->messages()->create([
                 'type' => 'discussion',
                 'content' => $from->name . ' a créé la discussion',
             ]);
 
+            $message->readBy()->syncWithoutDetaching($participantsId);
+
             for ($i = 1; $i <= rand(5, 250); $i++) {
                 $fromId = $discussion->participants->random(1)->first()->id;
-                $discussion->messages()->save(factory(App\Message::class)->make([
+                $message = $discussion->messages()->save(factory(App\Message::class)->make([
                     'from_id' => $fromId,
                 ]));
+                $message->readBy()->attach($participantsId);
             }
 
         });

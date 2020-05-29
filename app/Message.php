@@ -16,7 +16,7 @@ class Message extends Model
         'discussion_id' => 'integer'
     ];
 
-    protected $with = ['from'];
+    protected $with = ['from', 'readBy'];
 
     public function from()
     {
@@ -26,5 +26,10 @@ class Message extends Model
     public function discussion()
     {
         return $this->belongsTo('App\Discussion');
+    }
+
+    public function readBy()
+    {
+        return $this->belongsToMany('App\User')->withTimestamps();
     }
 }
