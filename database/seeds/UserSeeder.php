@@ -21,6 +21,8 @@ class UserSeeder extends Seeder
             'avatar' => '*',
             'api_token' => '12345678901234567890123456789012345678901234567890123456789012345678901234567890',
         ]);
+        usleep(300000);
+
         User::create([
             'name' => 'Marie',
             'email' => 'marie@gmail.com',
@@ -28,6 +30,8 @@ class UserSeeder extends Seeder
             'avatar' => '*',
             'api_token' => '12345678901234567890123456789012345678901234567890123456789012345678901234567891',
         ]);
+        usleep(300000);
+
         User::create([
             'name' => 'Sarah',
             'email' => 'sarah@gmail.com',
@@ -35,6 +39,8 @@ class UserSeeder extends Seeder
             'avatar' => null,
             'api_token' => Str::random(80),
         ]);
+        usleep(300000);
+
         User::create([
             'name' => 'Mehdi',
             'email' => 'mehdi@gmail.com',
@@ -42,6 +48,8 @@ class UserSeeder extends Seeder
             'avatar' => null,
             'api_token' => Str::random(80),
         ]);
+        usleep(300000);
+
         User::create([
             'name' => 'Emilie',
             'email' => 'emilie@gmail.com',
@@ -49,6 +57,8 @@ class UserSeeder extends Seeder
             'avatar' => null,
             'api_token' => Str::random(80),
         ]);
+        usleep(300000);
+
         User::create([
             'name' => 'Jade',
             'email' => 'jade@gmail.com',
@@ -56,5 +66,6 @@ class UserSeeder extends Seeder
             'avatar' => null,
             'api_token' => Str::random(80),
         ]);
+        usleep(300000);
     }
 }

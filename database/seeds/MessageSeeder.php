@@ -29,8 +29,8 @@ class MessageSeeder extends Seeder
                     'from_id' => $fromId,
                 ]));
                 $message->readBy()->attach($participantsId);
+                usleep(200000);
             }
-
         });
     }
 }

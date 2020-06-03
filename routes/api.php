@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +15,31 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::post('/user/auth', function (Request $request) {
+    $user = \App\User::all()
+        ->where('email', $request->email)
+        ->first();
+    if ($user) {
+        $user->makeVisible(['api_token', 'password']);
+        if (Hash::check($request->password, $user->password)) {
+            $user->makeHidden(['password']);
+            $user['viewingFlat'] = $user->flats->sortByDesc('created_at')->pluck('id')->first();
+            return $user;
+        }
+        abort(422, 'Mot de passe incorrect');
+        return ['error' => 'Une erreur est survenue lors de la connexion'];
+    } else {
+        abort(422, 'E-mail incorrect');
+        return ['error' => 'Une erreur est survenue lors de la connexion'];
+    }
+});
+
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        $user = $request->user();
+        $user->makeVisible(['api_token']);
+        $user['viewingFlat'] = $user->flats->sortByDesc('created_at')->pluck('id')->first();
+        return $user;
     });
 
     Route::get('/categories', function (Request $request) {
@@ -28,7 +51,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/flats', function (Request $request) {
         if (!$request->query('with')) {
-            return $request->user()->flats;
+            return $request->user()->flats->orderByDesc('created_at');
         }
         return $request->user()->flats->load(explode(',', $request->query('with')));
     });
@@ -155,6 +178,6 @@ Route::middleware('auth:api')->group(function () {
         $event->save();
         $event->participants()->attach($request->participants);
 
-        return $event;
+        return \App\Event::findOrFail($event->id);
     });
 });
