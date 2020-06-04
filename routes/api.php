@@ -135,7 +135,11 @@ Route::middleware('auth:api')->group(function () {
         ]);
         $newMsg->readBy()->syncWithoutDetaching($request->user()->id);
 
-        return \App\Message::findOrFail($newMsg->id);
+        $msg = \App\Message::findOrFail($newMsg->id);
+
+        broadcast(new \App\Events\MessageCreated($msg))->toOthers();
+
+        return $msg;
     });
 
     Route::get('/events', function (Request $request) {
