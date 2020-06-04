@@ -16,7 +16,7 @@ class EventSeeder extends Seeder
     {
         Event::create([
             'label' => 'Récurer la baignoire',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Ménage')->firstOrFail()->id,
             'confirm' => 'during',
             'start_date' => '2020-04-14 09:01:15',
@@ -25,7 +25,7 @@ class EventSeeder extends Seeder
 
         Event::create([
             'label' => 'Sortir les poubelles',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Ménage')->firstOrFail()->id,
             'confirm' => 'during',
             'start_date' => '2020-04-13 18:30:00',
@@ -34,7 +34,7 @@ class EventSeeder extends Seeder
 
         Event::create([
             'label' => 'Soirée Hunger Games',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Soirées')->firstOrFail()->id,
             'confirm' => 'during',
             'start_date' => '2020-04-26 13:00:00',
@@ -44,7 +44,7 @@ class EventSeeder extends Seeder
 
         Event::create([
             'label' => 'Laver la cuisine',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Ménage')->firstOrFail()->id,
             'confirm' => 'during',
             'start_date' => '2020-05-21 14:00:00',
@@ -53,7 +53,7 @@ class EventSeeder extends Seeder
 
         Event::create([
             'label' => 'Soirée pizza entre nous',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Soirées')->firstOrFail()->id,
             'confirm' => 'before',
             'start_date' => '2020-05-21 18:30:00',
@@ -61,7 +61,7 @@ class EventSeeder extends Seeder
 
         Event::create([
             'label' => 'Payer loyer',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Transactions')->firstOrFail()->id,
             'confirm' => 'before',
             'start_date' => '2020-04-05 07:00:00',
@@ -70,7 +70,7 @@ class EventSeeder extends Seeder
 
         Event::create([
             'label' => 'Payer les charges',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
             'category_id' => Category::whereLabel('Transactions')->firstOrFail()->id,
             'confirm' => 'before',
             'start_date' => '2020-04-05 07:00:00',
