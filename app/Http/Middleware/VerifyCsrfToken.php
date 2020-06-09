@@ -14,7 +14,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'http://localhost:8080/*',
         'http://flatmate-server.test/*',
-        'https://flatmate.api.mullercedric.com/*',
+        'http://mullercedric.com/flatmate-front/*',
         'broadcasting/auth',
     ];
 }

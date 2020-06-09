@@ -20,7 +20,7 @@ class Event extends Model
         'duration' => 'integer',
     ];
 
-    protected $with = ['flat', 'category'];
+    protected $with = ['flat', 'category', 'participants'];
 
     public function flat()
     {

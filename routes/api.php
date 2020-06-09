@@ -168,19 +168,20 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::post('/events', function (Request $request) {
-        $event = new \App\Event;
-        $event->label = $request->label;
-        $event->flat_id = $request->flat_id;
-        $event->category_id = $request->category_id;
-        $event->start_date = $request->start_date;
-        $event->end_date = $request->end_date;
-        $event->interval = $request->interval;
-        if ($request->duration) {
-            $event->duration = $request->duration;
-        }
-        $event->confirm = $request->confirm;
-        $event->save();
-        $event->participants()->attach($request->participants);
+        $event = \App\Event::updateOrCreate(
+            ['id' => request('id') ?? null],
+            [
+                'label' => request('label'),
+                'flat_id' => request('flat_id'),
+                'category_id' => request('category_id'),
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+                'interval' => request('interval'),
+                'duration' => request('duration') ?? 3600000,
+                'confirm' => request('confirm'),
+            ]
+        );
+        $event->participants()->sync($request->participants);
 
         return \App\Event::findOrFail($event->id);
     });
