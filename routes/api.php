@@ -185,4 +185,9 @@ Route::middleware('auth:api')->group(function () {
 
         return \App\Event::findOrFail($event->id);
     });
+
+    Route::delete('/events/{event}', function (Request $request, \App\Event $event) {
+        $event->delete();
+        return json_encode(['response' => 'Event deleted']);
+    });
 });
