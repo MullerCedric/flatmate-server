@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMessageUser extends Migration
+class CreateConfirmationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,15 @@ class CreateMessageUser extends Migration
      */
     public function up()
     {
-        Schema::create('message_user', function (Blueprint $table) {
+        Schema::create('confirmations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('message_id');
+            $table->foreignId('event_id');
             $table->foreignId('user_id');
+            $table->boolean('is_accepted');
+            $table->dateTime('event_repeat_instance');
             $table->timestamps();
 
-            $table->foreign('message_id')->references('id')->on('messages')->onDelete('cascade');
+            $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -31,6 +33,6 @@ class CreateMessageUser extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('message_user');
+        Schema::dropIfExists('confirmations');
     }
 }

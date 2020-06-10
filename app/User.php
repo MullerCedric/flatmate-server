@@ -83,6 +83,12 @@ class User extends Authenticatable
         return $this->morphedByMany('App\Event', 'participation', 'participants');
     }
 
+    public function eventsConfirmed()
+    {
+        return $this->belongsToMany('App\Event', 'confirmations')
+            ->withTimestamps()->withPivot('is_accepted', 'event_repeat_instance');
+    }
+
     public function flats()
     {
         return $this->morphedByMany('App\Flat', 'participation', 'participants');

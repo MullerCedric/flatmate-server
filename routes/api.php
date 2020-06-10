@@ -190,4 +190,26 @@ Route::middleware('auth:api')->group(function () {
         $event->delete();
         return json_encode(['response' => 'Event deleted']);
     });
+
+    Route::get('/events/{event}/confirmations', function (Request $request, \App\Event $event) {
+        $evRpIn = \Carbon\Carbon::parse($request->query('event_repeat_instance'))->setTimezone('UTC');
+
+        return $event->confirmedBy()
+            ->wherePivot('event_repeat_instance', $evRpIn)->get();
+    });
+
+    Route::post('/events/{event}/confirmations', function (Request $request, \App\Event $event) {
+        if (!$event->participants->contains($request->user()->id)) {
+            return $event->confirmedBy()->get();
+        }
+        $evRpIn = \Carbon\Carbon::parse($request->event_repeat_instance)->setTimezone('UTC');
+
+        $event->confirmedBy()->attach($request->user()->id, [
+            'is_accepted' => $request->is_accepted,
+            'event_repeat_instance' => $evRpIn,
+        ]);
+
+        return $event->confirmedBy()
+            ->wherePivot('event_repeat_instance', $evRpIn)->get();
+    });
 });

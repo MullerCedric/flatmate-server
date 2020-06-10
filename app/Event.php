@@ -37,6 +37,12 @@ class Event extends Model
         return $this->morphToMany('App\User', 'participation', 'participants');
     }
 
+    public function confirmedBy()
+    {
+        return $this->belongsToMany('App\User', 'confirmations')
+            ->withTimestamps()->withPivot('is_accepted', 'event_repeat_instance');
+    }
+
     public function scopeForFlat($query, $flat_id)
     {
         if (!!$flat_id) {
