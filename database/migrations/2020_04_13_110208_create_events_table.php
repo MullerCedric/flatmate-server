@@ -17,7 +17,6 @@ class CreateEventsTable extends Migration
             $table->id();
             $table->string('label', 100);
             $table->foreignId('flat_id')->nullable();
-            $table->foreignId('category_id')->nullable();
             $table->dateTime('start_date', 0);
             $table->dateTime('end_date', 0)->nullable();
             $table->bigInteger('interval', 0)->nullable();
@@ -26,7 +25,6 @@ class CreateEventsTable extends Migration
             $table->timestamps();
 
             $table->foreign('flat_id')->references('id')->on('flats')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
         });
     }
 

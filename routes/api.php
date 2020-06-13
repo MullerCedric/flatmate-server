@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,15 @@ Route::post('/user/auth', function (Request $request) {
         abort(422, 'E-mail incorrect');
         return ['error' => 'Une erreur est survenue lors de la connexion'];
     }
+});
+
+Route::post('/user', function (Request $request) {
+    return \App\User::create([
+        'name' => $request['name'],
+        'email' => $request['email'],
+        'password' => Hash::make($request['password']),
+        'api_token' => Str::random(80),
+    ])->makeVisible(['api_token']);
 });
 
 Route::middleware('auth:api')->group(function () {
@@ -68,7 +78,10 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::get('/discussions', function (Request $request) {
-        $discussions = $request->user()->discussions;
+        $discussions = \App\Discussion::fromFlat($request->query('flat_id'))
+            ->whereHas('participants', function ($query) use ($request) {
+                $query->where('user_id', '=', $request->user()->id);
+            })->get();
         foreach ($discussions as $discussion) {
             $discussion['latestMessage'] = \App\Message::where('discussion_id', $discussion['id'])
                 ->latest()->orderBy('id', 'desc')->first();
@@ -151,14 +164,34 @@ Route::middleware('auth:api')->group(function () {
         $to = \Carbon\Carbon::createFromTimestampMs($request->query('to'), 'Europe/Brussels');
 
         if ($request->query('type') === 'one_off') {
-            return $request->user()->events()->forFlat($request->query('flat_id'))
-                ->oneOff()
+            return \App\Event::oneOff()
+                ->where(function ($q) use ($request) {
+                    $q
+                        ->where('flat_id', $request->query('flat_id'))
+                        ->orWhere(function ($r) use ($request) {
+                            $r
+                                ->whereNull('flat_id')
+                                ->whereHas('participants', function ($s) use ($request) {
+                                    $s->where('user_id', '=', $request->user()->id);
+                                });
+                        });
+                })
                 ->whereDate('start_date', '>=', $from)
                 ->whereDate('start_date', '<=', $to)
                 ->get();
         } else {
-            return $request->user()->events()->forFlat($request->query('flat_id'))
-                ->recurring()
+            return \App\Event::recurring()
+                ->where(function ($q) use ($request) {
+                    $q
+                        ->where('flat_id', $request->query('flat_id'))
+                        ->orWhere(function ($r) use ($request) {
+                            $r
+                                ->whereNull('flat_id')
+                                ->whereHas('participants', function ($s) use ($request) {
+                                    $s->where('user_id', '=', $request->user()->id);
+                                });
+                        });
+                })
                 ->whereDate('start_date', '<=', $to)
                 ->where(function ($q) use ($from) {
                     return $q->whereDate('end_date', '>', $from)->orWhereNull('end_date');
@@ -173,7 +206,6 @@ Route::middleware('auth:api')->group(function () {
             [
                 'label' => request('label'),
                 'flat_id' => request('flat_id'),
-                'category_id' => request('category_id'),
                 'start_date' => request('start_date'),
                 'end_date' => request('end_date'),
                 'interval' => request('interval'),
@@ -181,6 +213,8 @@ Route::middleware('auth:api')->group(function () {
                 'confirm' => request('confirm'),
             ]
         );
+        $event->categories()->detach(\App\Category::all()->pluck('id'));
+        $event->categories()->attach($request->category_id);
         $event->participants()->sync($request->participants);
 
         return \App\Event::findOrFail($event->id);

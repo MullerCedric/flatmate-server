@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Event extends Model
 {
     protected $fillable = [
-        'label', 'flat_id', 'category_id', 'start_date', 'end_date', 'interval', 'duration', 'confirm'
+        'label', 'flat_id', 'start_date', 'end_date', 'interval', 'duration', 'confirm'
     ];
 
     protected $casts = [
@@ -20,16 +20,16 @@ class Event extends Model
         'duration' => 'integer',
     ];
 
-    protected $with = ['flat', 'category', 'participants'];
+    protected $with = ['flat', 'categories', 'participants'];
 
     public function flat()
     {
         return $this->belongsTo('App\Flat');
     }
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo('App\Category');
+        return $this->belongsToMany('App\Category');
     }
 
     public function participants()

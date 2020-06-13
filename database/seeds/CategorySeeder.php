@@ -12,22 +12,26 @@ class CategorySeeder extends Seeder
      */
     public function run()
     {
+        User::all()->each(function ($user) {
+            $user->categories()->create([
+                'label' => 'Ménage',
+                'color' => '#FFD378',
+                'weight' => 1,
+                'type' => 'events',
+            ]);
+
+            $user->categories()->create([
+                'label' => 'Travail',
+                'color' => '#007377',
+                'weight' => 3,
+                'type' => 'events',
+            ]);
+        });
+
         User::findOrFail(1)->categories()->create([
             'label' => 'Soirées',
             'color' => '#CC85FF',
             'weight' => 4,
-            'type' => 'events',
-        ]);
-        User::findOrFail(1)->categories()->create([
-            'label' => 'École',
-            'color' => '#007377',
-            'weight' => 3,
-            'type' => 'events',
-        ]);
-        User::findOrFail(1)->categories()->create([
-            'label' => 'Ménage',
-            'color' => '#FFD378',
-            'weight' => 1,
             'type' => 'events',
         ]);
         User::findOrFail(1)->categories()->create([

@@ -18,6 +18,7 @@ class CreateFlatsTable extends Migration
             $table->string('label', 250);
             $table->string('avatar');
             $table->foreignId('creator_id');
+            $table->string('key', 8)->unique();
             $table->timestamps();
             $table->softDeletes();
 

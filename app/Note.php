@@ -7,21 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Note extends Model
 {
     protected $fillable = [
-        'author_id', 'flat_id', 'locked_at'
+        'author_id', 'flat_id', 'label', 'content'
     ];
 
     protected $casts = [
         'id' => 'integer',
         'author_id' => 'integer',
         'flat_id' => 'integer',
-        'locked_at' => 'datetime'
     ];
 
-    protected $with = ['author'];
+    protected $with = ['author', 'categories'];
 
-    public function category()
+    public function categories()
     {
-        return $this->belongsTo('App\Category');
+        return $this->belongsToMany('App\Category');
     }
 
     public function author()

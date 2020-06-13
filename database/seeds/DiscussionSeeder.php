@@ -14,18 +14,18 @@ class DiscussionSeeder extends Seeder
     public function run()
     {
         Discussion::create([
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
         ])->participants()->attach([1, 2, 3]);
         usleep(600000);
 
         Discussion::create([
             'label' => 'Liste des courses',
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
         ])->participants()->attach([1, 2, 3]);
         usleep(600000);
 
         Discussion::create([
-            'flat_id' => Flat::findOrFail(1)->id,
+            'flat_id' => Flat::findOrFail(2)->id,
         ])->participants()->attach([1, 2]);
     }
 }

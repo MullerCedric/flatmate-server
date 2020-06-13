@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Scopes\FromUserScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
@@ -14,6 +15,11 @@ class Category extends Model
         'id' => 'integer',
         'user_id' => 'integer',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new FromUserScope());
+    }
 
     public function events()
     {
@@ -30,7 +36,8 @@ class Category extends Model
         return $this->belongsToMany('App\Transaction');
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsToMany('App\User');
     }
 }

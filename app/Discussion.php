@@ -16,6 +16,11 @@ class Discussion extends Model
         'locked_at' => 'datetime',
     ];
 
+    public function scopeFromFlat($query, $flatId)
+    {
+        return $query->where('flat_id', $flatId);
+    }
+
     public function flat()
     {
         return $this->belongsTo('App\Flat');
