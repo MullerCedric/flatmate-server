@@ -52,6 +52,43 @@ Route::middleware('auth:api')->group(function () {
         return $user;
     });
 
+    Route::patch('/user', function (Request $request) {
+        $user = $request->user();
+
+        if (isset($request->profile['password'])) {
+            $user->makeVisible(['password']);
+            if (!Hash::check($request->profile['old_password'], $user->password)) {
+                abort(422, 'Mot de passe incorrect');
+                return ['error' => 'Une erreur est survenue lors de la modification du mot de passe'];
+            }
+            $user->password = Hash::make($request->profile['password']);
+            $user->save();
+            $user->makeHidden(['password']);
+            return $user;
+        }
+
+        $user->update($request->profile);
+        return $user;
+    });
+
+    Route::post('/user/avatar', function (Request $request) {
+        if ($request->file('avatar') && $request->file('avatar')->isValid()) {
+            // $path = $request->avatar->store('avatars', 'public');
+            $fileName = urlencode($request->avatar->getClientOriginalName());
+            $fileNameFull = time() . '-' . $fileName;
+            $path = 'img/avatars/' . $fileNameFull;
+            $request->avatar->move('img/avatars', $fileNameFull);
+
+            $user = $request->user();
+            $user->update(['avatar' => $path]);
+
+            return $path;
+        } else {
+            abort(422, 'Image corrompue');
+            return ['error' => 'Une erreur est survenue lors de l\'upload de l\'image'];
+        }
+    });
+
     Route::get('/categories', function (Request $request) {
         if (!in_array($request->query('type'), ['events', 'transactions', 'notes'])) {
             return collect();

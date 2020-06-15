@@ -16,6 +16,7 @@ class CreateDiscussionsTable extends Migration
         Schema::create('discussions', function (Blueprint $table) {
             $table->id();
             $table->string('label', 250)->nullable();
+            $table->string('avatar')->nullable();
             $table->foreignId('flat_id');
             $table->dateTime('locked_at')->nullable();
             $table->timestamps();

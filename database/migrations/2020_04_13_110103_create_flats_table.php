@@ -16,7 +16,7 @@ class CreateFlatsTable extends Migration
         Schema::create('flats', function (Blueprint $table) {
             $table->id();
             $table->string('label', 250);
-            $table->string('avatar');
+            $table->string('avatar')->nullable();
             $table->foreignId('creator_id');
             $table->string('key', 8)->unique();
             $table->timestamps();

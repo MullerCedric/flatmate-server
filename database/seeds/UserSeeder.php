@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
             'name' => 'Emma',
             'email' => 'emma@gmail.com',
             'password' => Hash::make('password'),
-            'avatar' => '*',
             'api_token' => '12345678901234567890123456789012345678901234567890123456789012345678901234567890',
         ]);
         usleep(300000);
@@ -27,7 +26,6 @@ class UserSeeder extends Seeder
             'name' => 'Marie',
             'email' => 'marie@gmail.com',
             'password' => Hash::make('password'),
-            'avatar' => '*',
             'api_token' => '12345678901234567890123456789012345678901234567890123456789012345678901234567891',
         ]);
         usleep(300000);
