@@ -36,7 +36,7 @@ Route::post('/user/auth', function (Request $request) {
 });
 
 Route::post('/user', function (Request $request) {
-    $user = \App\User::create([
+    $user = \App\User::withoutGlobalScope(\App\Scopes\FromUserScope::class)->create([
         'name' => $request['name'],
         'email' => $request['email'],
         'password' => Hash::make($request['password']),

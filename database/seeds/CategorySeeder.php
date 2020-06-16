@@ -12,7 +12,7 @@ class CategorySeeder extends Seeder
      */
     public function run()
     {
-        User::all()->each(function ($user) {
+        User::withoutGlobalScope(\App\Scopes\FromUserScope::class)->all()->each(function ($user) {
             $user->categories()->create([
                 'label' => 'Ménage',
                 'color' => '#FFD378',
@@ -28,19 +28,19 @@ class CategorySeeder extends Seeder
             ]);
         });
 
-        User::findOrFail(1)->categories()->create([
+        User::withoutGlobalScope(\App\Scopes\FromUserScope::class)->findOrFail(1)->categories()->create([
             'label' => 'Soirées',
             'color' => '#CC85FF',
             'weight' => 4,
             'type' => 'events',
         ]);
-        User::findOrFail(1)->categories()->create([
+        User::withoutGlobalScope(\App\Scopes\FromUserScope::class)->findOrFail(1)->categories()->create([
             'label' => 'Transactions',
             'color' => '#228539',
             'weight' => 2,
             'type' => 'events',
         ]);
-        User::findOrFail(1)->categories()->create([
+        User::withoutGlobalScope(\App\Scopes\FromUserScope::class)->findOrFail(1)->categories()->create([
             'label' => 'Deadline',
             'color' => '#E8796D',
             'weight' => 0,
