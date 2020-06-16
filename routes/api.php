@@ -36,12 +36,35 @@ Route::post('/user/auth', function (Request $request) {
 });
 
 Route::post('/user', function (Request $request) {
-    return \App\User::create([
+    $user = \App\User::create([
         'name' => $request['name'],
         'email' => $request['email'],
         'password' => Hash::make($request['password']),
         'api_token' => Str::random(80),
     ])->makeVisible(['api_token']);
+
+    $user->categories()->create([
+        'label' => 'Ménage',
+        'color' => '#FFD378',
+        'weight' => 1,
+        'type' => 'events',
+    ]);
+
+    $user->categories()->create([
+        'label' => 'Travail',
+        'color' => '#007377',
+        'weight' => 3,
+        'type' => 'events',
+    ]);
+
+    $user->categories()->create([
+        'label' => 'Soirées',
+        'color' => '#CC85FF',
+        'weight' => 4,
+        'type' => 'events',
+    ]);
+
+    return $user;
 });
 
 Route::middleware('auth:api')->group(function () {
@@ -73,7 +96,6 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('/user/avatar', function (Request $request) {
         if ($request->file('avatar') && $request->file('avatar')->isValid()) {
-            // $path = $request->avatar->store('avatars', 'public');
             $fileName = urlencode($request->avatar->getClientOriginalName());
             $fileNameFull = time() . '-' . $fileName;
             $path = 'img/avatars/' . $fileNameFull;
@@ -103,6 +125,82 @@ Route::middleware('auth:api')->group(function () {
         return $request->user()->flats->load(explode(',', $request->query('with')));
     });
 
+    Route::post('/flats', function (Request $request) {
+        $flat = \App\Flat::updateOrCreate(
+            ['id' => $request->id ?? null],
+            [
+                'label' => $request->label,
+                'avatar' => $request->avatar ?? null,
+                'address' => $request->address ?? null,
+                'landlord' => $request->landlord ?? null,
+                'creator_id' => $request->user()->id,
+                'key' => $request->key ?? Str::random(8),
+            ]
+        );
+        $flat->participants()->syncWithoutDetaching($request->user()->id);
+
+        if (!$request->id) {
+            $discussion = new \App\Discussion;
+            $discussion->label = $request->label ?? null;
+            $discussion->flat_id = $flat->id;
+            $discussion->save();
+            $discussion->participants()->attach($request->user()->id);
+            $discussion->messages()->create([
+                'type' => 'flat',
+                'content' => 'La colocation vient d\'être créée',
+            ]);
+        }
+
+        return $flat;
+    });
+
+    Route::get('/flats/join/{flat:key}', function (Request $request, \App\Flat $flat) {
+
+        $discussions = $flat->discussions()->oldest()->first();
+        $firstDiscussion = $discussions->first();
+
+        dd($discussions, $firstDiscussion);
+
+        return $flat;
+    })->where('flat', '\w{8}');
+
+    Route::post('/flats/join/{flat:key}', function (Request $request, \App\Flat $flat) {
+        $flat->participants()->syncWithoutDetaching($request->user()->id);
+
+        $discussions = $flat->discussions()->oldest();
+        $discussions->each(function ($discussion) use ($request) {
+            $discussion->participants()->syncWithoutDetaching($request->user()->id);
+        });
+
+        $firstDiscussion = $discussions->oldest()->orderBy('id', 'asc')->first();
+        $firstDiscussion->messages()->create([
+            'type' => 'flat',
+            'content' => $request->user()->name . ' a rejoint la colocation',
+        ]);
+
+        return $flat;
+    })->where('flat', '\w{8}');
+
+
+    Route::post('/flats/{flat}/avatar', function (Request $request, \App\Flat $flat) {
+        if (!$flat->participants->contains($request->user()->id)) {
+            return collect();
+        }
+        if ($request->file('avatar') && $request->file('avatar')->isValid()) {
+            $fileName = urlencode($request->avatar->getClientOriginalName());
+            $fileNameFull = time() . '-' . $fileName;
+            $path = 'img/avatars/' . $fileNameFull;
+            $request->avatar->move('img/avatars', $fileNameFull);
+
+            $flat->update(['avatar' => $path]);
+
+            return $path;
+        } else {
+            abort(422, 'Image corrompue');
+            return ['error' => 'Une erreur est survenue lors de l\'upload de l\'image'];
+        }
+    })->where('flat', '[0-9]+');
+
     Route::get('/flats/{flat}', function (Request $request, \App\Flat $flat) {
         if (!$flat->participants->contains($request->user()->id)) {
             return collect();
@@ -112,7 +210,7 @@ Route::middleware('auth:api')->group(function () {
             $flat->load($loadingProperty);
         }
         return $flat;
-    });
+    })->where('flat', '[0-9]+');
 
     Route::get('/discussions', function (Request $request) {
         $discussions = \App\Discussion::fromFlat($request->query('flat_id'))
@@ -171,7 +269,7 @@ Route::middleware('auth:api')->group(function () {
         }
         $discussion['messages'] = $messages;
         return $discussion;
-    });
+    })->where('discussion', '[0-9]+');
 
     Route::post('/discussions/{discussion}', function (Request $request, \App\Discussion $discussion) {
         if (!$discussion->participants->contains($request->user()->id)) {
@@ -190,7 +288,7 @@ Route::middleware('auth:api')->group(function () {
         broadcast(new \App\Events\MessageCreated($msg))->toOthers();
 
         return $msg;
-    });
+    })->where('discussion', '[0-9]+');
 
     Route::get('/events', function (Request $request) {
         if (!in_array($request->query('type'), ['one_off', 'recurring']) ||
@@ -260,14 +358,14 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/events/{event}', function (Request $request, \App\Event $event) {
         $event->delete();
         return json_encode(['response' => 'Event deleted']);
-    });
+    })->where('event', '[0-9]+');
 
     Route::get('/events/{event}/confirmations', function (Request $request, \App\Event $event) {
         $evRpIn = \Carbon\Carbon::parse($request->query('event_repeat_instance'))->setTimezone('UTC');
 
         return $event->confirmedBy()
             ->wherePivot('event_repeat_instance', $evRpIn)->get();
-    });
+    })->where('event', '[0-9]+');
 
     Route::post('/events/{event}/confirmations', function (Request $request, \App\Event $event) {
         if (!$event->participants->contains($request->user()->id)) {
@@ -282,5 +380,5 @@ Route::middleware('auth:api')->group(function () {
 
         return $event->confirmedBy()
             ->wherePivot('event_repeat_instance', $evRpIn)->get();
-    });
+    })->where('event', '[0-9]+');
 });

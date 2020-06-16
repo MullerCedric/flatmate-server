@@ -17,6 +17,8 @@ class CreateFlatsTable extends Migration
             $table->id();
             $table->string('label', 250);
             $table->string('avatar')->nullable();
+            $table->text('address')->nullable();
+            $table->text('landlord')->nullable();
             $table->foreignId('creator_id');
             $table->string('key', 8)->unique();
             $table->timestamps();
